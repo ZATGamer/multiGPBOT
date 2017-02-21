@@ -8,7 +8,7 @@ import ConfigParser
 import datetime
 
 
-def watch_rss():
+def watch_rss(new_race):
     # Do a GET on the site for the RSS
     raw_race_data = session.get(rss_url).content
 
@@ -39,6 +39,7 @@ def watch_rss():
                 add_race_to_db(key, race_data[key])
             else:
                 print("Something went wrong, Race {} not joined or added to DB.".format(key))
+        return new_race
 
 
 def join_race(key, race_data):
@@ -158,6 +159,7 @@ def create_db():
     db_c.executemany(''' INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
                      race_data)
     db_conn.commit()
+    db_conn.close()
 
 
 def start_up():
@@ -171,18 +173,22 @@ if __name__ == '__main__':
     config.read('./config.ini')
     rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
 
-    # Flag for if there is a new race not already in the history DB.
-    new_race = False
-
     # setting up the session
     session = requests.Session()
     start_up()
 
-    conn = sqlite3.connect('./races.db')
+    # Setting up the DB connection
+    db_path = config.get('database', 'path')
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    watch_rss()
+    # Flag for if there is a new race not already in the history DB.
+    new_race = False
 
+    # Start the watch.
+    new_race = watch_rss(new_race)
+
+    # Be nice the DB and close the connection
     conn.close()
 
     if new_race:
