@@ -39,7 +39,7 @@ def watch_rss(new_race):
                 add_race_to_db(key, race_data[key])
             else:
                 print("Something went wrong, Race {} not joined or added to DB.".format(key))
-        return new_race
+    return new_race
 
 
 def join_race(key, race_data):
