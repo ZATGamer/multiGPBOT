@@ -119,7 +119,7 @@ def add_race_to_db(race_id, race_data):
     # Prep the data for the DB
     insert_data = (race_id, race_data['title'], race_data['link'], race_data['pubDate'], race_data['description'],
                    race_data['raceDate'])
-    c.execute(''' INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
+    c.execute('''INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
               insert_data)
     conn.commit()
 
@@ -127,10 +127,11 @@ def add_race_to_db(race_id, race_data):
 def create_db():
     # This will Create the database and then read the rss feed and input all the existing races into the database.
     print('Running first time db setup.')
-    with open('./races.db', 'ab'):
+    db_path = config.get('database', 'path')
+    with open(db_path, 'ab'):
         pass
     # Connect to the database
-    db_conn = sqlite3.connect('./races.db')
+    db_conn = sqlite3.connect(db_path)
     db_c = db_conn.cursor()
     # Create table
     db_c.execute('''CREATE TABLE races (raceID, title, link, pubDate, description, raceDate)''')
@@ -156,7 +157,7 @@ def create_db():
         )
         race_data.append(current)
 
-    db_c.executemany(''' INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
+    db_c.executemany('''INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
                      race_data)
     db_conn.commit()
     db_conn.close()
@@ -164,7 +165,7 @@ def create_db():
 
 def start_up():
     # stuff to run at start up. Does basic check like if the DB has been created or not. If not then create it.
-    if not os.path.exists('./races.db'):
+    if not os.path.exists(config.get('database', 'path')):
         create_db()
 
 
