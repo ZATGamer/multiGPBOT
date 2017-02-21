@@ -31,7 +31,8 @@ def watch_rss():
 
         if not db_race:
             # if Key Not in DB, fire off the Join function.
-            print("Should Join raceID: {}".format(key))
+            print("Race available to join raceID: {}".format(key))
+            new_race = True
             joined = join_race(key, race_data[key])
             # Once successfully joined. Add it to the DB.
             if joined:
@@ -94,12 +95,21 @@ def click_join(race_id):
     # Build the join URL via config and plug in the raceID.
     join_url = '{}{}{}'.format(config.get('multiGP', 'url'), config.get('multiGP', 'join_uri'), race_id)
 
+    # Printing URL for Console Debugging.
+    print(join_url)
+
     # Build the form data
     aircraft_data = {'RaceEntry[aircraftId]': config.get('chapter', 'aircraft_id')}
-    # using the session send the post.
 
+    # Printing data for Console Debugging.
+    print aircraft_data
+
+    # using the session send the post.
     join_post = session.post(join_url, data=aircraft_data)
     # pass
+
+    # More debugging stuff.
+    print("Join POST status code: {}".format(join_post.status_code))
 
     return join_post.status_code
 
@@ -172,3 +182,10 @@ if __name__ == '__main__':
     c = conn.cursor()
 
     watch_rss()
+
+    conn.close()
+
+    if new_race:
+        print("New Race")
+    else:
+        print("No New Race")
