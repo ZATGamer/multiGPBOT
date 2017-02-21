@@ -7,29 +7,33 @@ import sqlite3
 import ConfigParser
 
 
-def watch_rss(url):
-    # This function will watch the RSS for changes and then will set the change flag to true when it sees them
-    responce = requests.get('http://www.multigp.com/multigp/chapter/rss/name/AuroraFPV').content
+def watch_rss():
+    # Do a GET on the site for the RSS
+    raw_race_data = session.get(rss_url).content
 
-    races_responce = xmltodict.parse(responce, process_namespaces=True)
+    # Convert the XML to something I can use
+    races_responce = xmltodict.parse(raw_race_data, process_namespaces=True)
 
-    races = []
-
+    # Create a Dict of all the data using the RaceID as the Key
+    race_data = {}
     for race in races_responce['rss']['channel']['item']:
-        current = []
-        current.append(race['pubDate'])
-        current.append(race['link'])
-        print race['pubDate']
-        print race['link']
-        races.append(current)
+        race_data[race['link'].split('/')[5]] = {'title': race['title'],
+                                                 'link': race['link'],
+                                                 'pubDate': race['pubDate'],
+                                                 'description': race['description'],
+                                                 'raceDate': race['title'].split('-')[-1]}
 
-    print len(races)
+    # Query the DB for each Key
+    for key in race_data:
+        c.execute('''SELECT raceID FROM races WHERE raceID = ?''', (key,))
+        db_race = c.fetchone()
 
-
-def test():
-    test_url = 'http://www.multigp.com/multigp/aircraft/update/id/16205'
-    test = requests.get(test_url)
-    print test.status_code
+        if db_race == None:
+            print("Should Join raceID: {}".format(key))
+            # if Key Not in DB, fire off the Join function.
+            # Once successfully joined. Add it to the DB.
+        else:
+            print("raceID {} already Joined".format(key))
 
 
 def login():
@@ -66,13 +70,13 @@ def click_join(session):
 def create_db():
     # This will Create the database and then read the rss feed and input all the existing races into the database.
     print('Running first time db setup.')
-    with open('./races.db'):
+    with open('./races.db', 'ab'):
         pass
     # Connect to the database
     conn = sqlite3.connect('./races.db')
     c = conn.cursor()
     # Create table
-    c.execute('''CREATE TABLE races (title, link, pubDate, description)''')
+    c.execute('''CREATE TABLE races (raceID, title, link, pubDate, description, raceDate)''')
     conn.commit()
 
     # read rss feed
@@ -85,12 +89,18 @@ def create_db():
     for race in races_responce['rss']['channel']['item']:
         current = []
         # Dig out the Race ID from the URL.
-        # raceID = race['link'].split('/')
-        current.append(raceID)
+        current.append(race['link'].split('/')[5])
+        # current.append(raceID)
         current.append(race['title'])
         current.append(race['link'])
         current.append(race['pubDate'])
         current.append(race['description'])
+        current.append(race['title'].split('-')[-1])
+        current = tuple(current)
+        race_data.append(current)
+
+    c.executemany(''' INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''', race_data)
+    conn.commit()
 
 
 def start_up():
@@ -99,19 +109,40 @@ def start_up():
         create_db()
 
 
+def test():
+    conn = sqlite3.connect('./races.db')
+    c = conn.cursor()
+    c.execute('''SELECT raceID FROM races''')
+    raw_races = c.fetchall()
+
+    races = []
+    for thing in raw_races:
+        races.append(thing[0])
+    if '6532' in races:
+        print 'yes'
+
+    print test
+
+
 if __name__ == '__main__':
     config = ConfigParser.RawConfigParser()
     config.read('./config.ini')
-    rss_url = config.get('chapter', 'url')
+    rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
 
     # Flag for if there is a new race not already in the history DB.
     new_race = False
 
     #setting up the session
     session = requests.Session()
+    start_up()
 
-    # No need to log in at this point. You can access this page un authenticated
-    watch_rss(rss_url)
+    conn = sqlite3.connect('./races.db')
+    c = conn.cursor()
+
+    watch_rss()
+    # test()
+    # No need to login at this point. You can access this page un authenticated
+    # watch_rss(rss_url)
 
     # if new_race:
     #     login()
