@@ -5,6 +5,7 @@ import requests
 import xmltodict
 import sqlite3
 import ConfigParser
+import datetime
 
 
 def watch_rss():
@@ -30,10 +31,50 @@ def watch_rss():
 
         if db_race == None:
             print("Should Join raceID: {}".format(key))
+
+            join_race(key, race_data[key])
             # if Key Not in DB, fire off the Join function.
             # Once successfully joined. Add it to the DB.
         else:
             print("raceID {} already Joined".format(key))
+
+
+def join_race(key, race_data):
+    pass
+    # Check to see if race is in blackout
+
+    in_balckout = check_blackout(race_data)
+    if not in_balckout:
+        # If not in blackout: Join...
+        # # Log into multiGP
+        # # Send Post to join the race with specified quad.
+        # # Once Joined, add to DB
+        pass
+    else:
+        # else don't join but add to DB.
+        pass
+
+
+
+
+
+
+def check_blackout(race_data):
+    # read in blackout dates from config.
+    # Get date when race is.
+    race_date = datetime.datetime.strptime(race_data['raceDate'], " %b %d, %Y")
+    bo_dates = config.get('blackout', 'dates').split(',')
+    bo_dates_parsed = []
+    for date in bo_dates:
+        bo_dates_parsed.append(datetime.datetime.strptime(date, '%Y%m%d'))
+    if race_date in bo_dates_parsed:
+        print("Race date is in blackout dates.")
+        return True
+    else:
+        print("Race date is NOT in blackout dates.")
+        return False
+
+
 
 
 def login():
