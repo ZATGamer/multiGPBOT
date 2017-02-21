@@ -155,9 +155,9 @@ def create_db():
         )
         race_data.append(current)
 
-    c.executemany(''' INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
-                  race_data)
-    conn.commit()
+    db_c.executemany(''' INSERT INTO races(raceID, title, link, pubDate, description, raceDate) VALUES(?,?,?,?,?,?)''',
+                     race_data)
+    db_conn.commit()
 
 
 def start_up():
