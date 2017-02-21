@@ -193,6 +193,6 @@ if __name__ == '__main__':
     conn.close()
 
     if new_race:
-        print("New Race")
+        print("{} New Race".format(datetime.datetime.now()))
     else:
-        print("No New Race")
+        print("{} No New Race".format(datetime.datetime.now()))
