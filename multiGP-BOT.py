@@ -45,8 +45,8 @@ def watch_rss(new_race):
 def join_race(key, race_data):
     # Check to see if race is in blackout
     in_blackout = check_blackout(race_data)
-
-    if not in_blackout:
+    is_micro = check_micro(race_data)
+    if not in_blackout and is_micro:
         # If not in blackout: Join...
         # Log into multiGP
         login()
@@ -78,6 +78,13 @@ def check_blackout(race_data):
         return True
     else:
         print("Race date is NOT in blackout dates.")
+        return False
+
+
+def check_micro(race_data):
+    if 'micro' in race_data['title'].lower():
+        return True
+    else:
         return False
 
 
@@ -189,7 +196,7 @@ if __name__ == '__main__':
     # Start the watch.
     new_race = watch_rss(new_race)
 
-    # Be nice the DB and close the connection
+    # Be nice to the DB and close the connection
     conn.close()
 
     if new_race:
