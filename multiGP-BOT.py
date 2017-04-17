@@ -46,7 +46,11 @@ def join_race(key, race_data):
     # Check to see if race is in blackout
     in_blackout = check_blackout(race_data)
     is_micro = check_micro(race_data)
+
+    print in_blackout, is_micro
+
     if not in_blackout and is_micro:
+        print "in loop"
         # If not in blackout: Join...
         # Log into multiGP
         login()
