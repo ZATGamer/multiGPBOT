@@ -48,6 +48,7 @@ def join_race(key, race_data):
     is_micro = check_micro(race_data)
 
     if not in_blackout and is_micro:
+        print("Trying to Join the Race.")
         # If not in blackout: Join...
         # Log into multiGP
         login()
@@ -63,6 +64,7 @@ def join_race(key, race_data):
 
     else:
         # else don't join but add to DB.
+        print("Race NOT joined but added to DB")
         return True
 
 
@@ -84,8 +86,10 @@ def check_blackout(race_data):
 
 def check_micro(race_data):
     if 'micro' in race_data['title'].lower():
+        print("Race is a Micro Race.")
         return True
     else:
+        print("Race is NOT a Micro Race.")
         return False
 
 
