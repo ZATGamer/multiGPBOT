@@ -3,6 +3,7 @@ import ConfigParser
 import bs4, requests
 import os.path
 import email_notification
+import datetime
 
 
 def login():
@@ -47,7 +48,7 @@ if __name__ == '__main__':
 
     session = requests.Session()
 
-    print('Race currently has {} pilots. Out of {}'.format(count, config.get('auto_close', 'pilots')))
+    print('Race currently has {} pilots. Out of {}. -- {}'.format(count, config.get('auto_close', 'pilots'), datetime.datetime.now()))
 
     if count >= int(config.get('auto_close', 'pilots')):
         login()
