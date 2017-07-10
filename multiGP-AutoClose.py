@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import ConfigParser
 import bs4, requests
 
