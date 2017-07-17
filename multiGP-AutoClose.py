@@ -5,6 +5,7 @@ import bs4, requests
 import os.path
 import email_notification
 import datetime
+import message_groupme
 
 
 def login():
@@ -31,8 +32,9 @@ def close_race():
     print("Race has Reached Limit. CLOSE IT!")
     if not os.path.exists('notified.txt'):
         print("Sending Notice")
-        body = 'Time to close the race!\n Close URL: "http://www.multigp.com/multigp/race/close/id/{}"'.format(config.get('auto_close', 'id'))
-        email_notification.send_notification("CLOSE THE RACE!", body)
+        body = 'Time to close the race! Has {} out of {} Pilots.\n Close URL: "http://www.multigp.com/multigp/race/close/id/{}"'.format(count, config.get('auto_close', 'pilots'), config.get('auto_close', 'id'))
+        # email_notification.send_notification("CLOSE THE RACE!", body)
+        message_groupme.send_message(body)
         with open('notified.txt', 'ab'):
             pass
     else:
