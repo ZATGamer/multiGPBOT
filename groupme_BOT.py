@@ -231,21 +231,4 @@ def get_db_conn():
 
 
 if __name__ == '__main__':
-    config = ConfigParser.RawConfigParser()
-    config.read('config.ini')
-
-    bot_id = config.get('GroupMe', 'bot_id')
-
-    test = {"text": "Sorry for the spam", "bot_id": bot_id}
-
-    url = 'https://api.groupme.com/v3/messages'
-    print url
-
-    s = requests.Session()
-    # s.headers.update({'token': token})
-    s.headers.update({'Accept': 'application/json'})
-    s.verify = False
-    s.headers.update({'token': bot_id})
-    # r_data = s.post(url, data=test)
-    r_data = s.get(url)
-    print r_data.content
+    app.run()
