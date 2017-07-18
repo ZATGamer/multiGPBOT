@@ -11,8 +11,11 @@ def web_hook():
     data = request.get_json()
     called = ''
 
+    config = ConfigParser.RawConfigParser()
+    config.read('./config.ini')
+
     # make sure I didn't send the message
-    if data['name'] != 'Race Full Notice':
+    if data['name'] != config.get('GroupMe', 'bot_name'):
         message = data['text'].split(' ')
         if message[0].lower() == '!bot':
             # You have asked the bot to do something. Now do what it asks.
@@ -59,9 +62,20 @@ def help_info():
     send_message(message)
 
 
-def get_pilot_count():
+def get_pilot_count(raceID):
     # Get the current pilot count for raceID
-    pass
+    conn, c = get_db_conn()
+    c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+    r_data = c.fetchone()
+
+    if r_data:
+        body = 'Race {} currently had {} pilots, with a max of {}.'.format(r_data[0], r_data[3], r_data[1])
+        send_message(body)
+    else:
+        body = 'I am not currently watching Race {}.\n' \
+               'This could be because it has reached it\'s limit and I stopped watching.\n' \
+               'Or I wasn\'t watching it.'
+        send_message(body)
 
 
 def list_race_watch():
