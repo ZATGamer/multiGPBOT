@@ -69,12 +69,16 @@ def list_race_watch():
     conn, c = get_db_conn()
     c.execute('''SELECT * FROM races''')
     races = c.fetchall()
-    m_body = 'Currently Watching:\n'
-    for race in races:
-        m_body += 'RaceId: {}, Max Pilots: {}.\n'.format(race[0], race[1])
 
-    send_message(m_body)
+    if races:
+        m_body = 'Currently Watching:\n'
+        for race in races:
+            m_body += 'RaceId: {}, Max Pilots: {}.\n'.format(race[0], race[1])
 
+        send_message(m_body)
+    else:
+        body = 'I am not currently watching any Races.'
+        send_message(body)
     conn.close()
 
 
@@ -104,6 +108,8 @@ def update_race_watch(raceID, max_pilots):
         send_message(body)
         add_race_watch(raceID, max_pilots)
 
+    conn.close()
+
 
 def add_race_watch(raceID, max_pilots):
     # This will add a race to the watch list.
@@ -126,6 +132,8 @@ def add_race_watch(raceID, max_pilots):
             body = "Added RaceID {} with a Max Pilots of {}".format(validate[0], validate[1])
             send_message(body)
 
+    conn.close()
+
 
 def remove_race_watch(raceID):
     # This will remove a race from the watch list.
@@ -146,6 +154,8 @@ def remove_race_watch(raceID):
     else:
         body = "I was not watching Race {}".format(raceID)
         send_message(body)
+
+    conn.close()
 
 
 def send_message(body):
