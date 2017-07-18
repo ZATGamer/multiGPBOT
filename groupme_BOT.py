@@ -202,7 +202,7 @@ def send_message(body):
     config.read('./config.ini')
 
     url = config.get('GroupMe', 'api_url')
-    bot_id = config.get('GroupMe', 'test_bot_id')
+    bot_id = config.get('GroupMe', 'bot_id')
 
     data = {"text": body, "bot_id": bot_id}
 
