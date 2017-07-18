@@ -157,7 +157,7 @@ def add_race_watch(raceID, max_pilots):
         send_message(body)
         update_race_watch(raceID, max_pilots)
     else:
-        c.execute('''INSERT INTO races (raceID, max_pilots, notified, count) VALUES(?,?,?,?)''', (raceID, max_pilots, False, 0))
+        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''', (raceID, max_pilots, False, 0))
         conn.commit()
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
@@ -215,7 +215,7 @@ def initial_count(raceID, c, conn):
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
-    c.execute('''UPDATE races SET "count"=? WHERE raceID=?''', (count, raceID))
+    c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
     conn.commit()
 
 
