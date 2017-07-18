@@ -23,7 +23,7 @@ def web_hook():
 
                 elif message[1].lower() == 'remove':
                     called = 'remove'
-                    remove_race_watch()
+                    remove_race_watch(message[2])
 
                 elif message[1].lower() == 'update':
                     called = 'update'
@@ -100,7 +100,7 @@ def update_race_watch(raceID, max_pilots):
             send_message(body)
     else:
         body = 'Race {} doesn\'t exist...\n' \
-               'Going to add it for you.'
+               'Going to add it for you.'.format(raceID)
         send_message(body)
         add_race_watch(raceID, max_pilots)
 
@@ -127,9 +127,25 @@ def add_race_watch(raceID, max_pilots):
             send_message(body)
 
 
-def remove_race_watch():
+def remove_race_watch(raceID):
     # This will remove a race from the watch list.
-    return 'remove'
+    body = 'Removing Race {} from the watch list.'.format(raceID)
+    send_message(body)
+
+    conn, c = get_db_conn()
+    c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+    i_check = c.fetchone()
+    if i_check:
+        c.execute('''DELETE * FROM races WHERE raceID=?''', (raceID,))
+        conn.commit()
+        c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+        validate = c.fetchone()
+        if not validate:
+            body = "I have stopped watching Race {}.".format(raceID)
+            send_message(body)
+    else:
+        body = "I was not watching Race {}".format(raceID)
+        send_message(body)
 
 
 def send_message(body):
