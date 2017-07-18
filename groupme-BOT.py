@@ -22,15 +22,24 @@ def web_hook():
             if len(message) > 1:
                 if message[1].lower() == 'add':
                     called = 'add'
-                    add_race_watch(message[2], message[3])
+                    if len(message) < 4:
+                        missing_info()
+                    else:
+                        add_race_watch(message[2], message[3])
 
                 elif message[1].lower() == 'remove':
                     called = 'remove'
-                    remove_race_watch(message[2])
+                    if len(message) < 3:
+                        missing_info()
+                    else:
+                        remove_race_watch(message[2])
 
                 elif message[1].lower() == 'update':
                     called = 'update'
-                    update_race_watch(message[2], message[3])
+                    if len(message) < 4:
+                        missing_info()
+                    else:
+                        update_race_watch(message[2], message[3])
 
                 elif message[1].lower() == 'list':
                     called = 'list'
@@ -38,7 +47,10 @@ def web_hook():
 
                 elif message[1].lower() == 'status':
                     called = 'status'
-                    get_pilot_count(message[2])
+                    if len(message) < 3:
+                        missing_info()
+                    else:
+                        get_pilot_count(message[2])
 
                 else:
                     called = 'help'
@@ -48,6 +60,12 @@ def web_hook():
                 help_info()
 
     return called, 200
+
+
+def missing_info():
+    body = "Missing required parameter."
+    send_message(body)
+    help_info()
 
 
 def help_info():
