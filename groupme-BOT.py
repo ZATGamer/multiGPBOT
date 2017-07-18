@@ -87,7 +87,7 @@ def update_race_watch(raceID, max_pilots):
     c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
     pre_check = c.fetchone()
     if pre_check:
-        if pre_check[2] != max_pilots:
+        if pre_check[1] != max_pilots:
             c.execute('''UPDATE races SET max_pilots=? WHERE raceID=?''', (max_pilots, raceID))
             conn.commit()
             c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
