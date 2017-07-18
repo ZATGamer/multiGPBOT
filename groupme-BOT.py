@@ -2,7 +2,7 @@ import requests
 import ConfigParser
 from flask import Flask, request
 import sqlite3
-import multiGP_AutoClose_v2
+import bs4
 
 app = Flask(__name__)
 
@@ -157,12 +157,12 @@ def add_race_watch(raceID, max_pilots):
         send_message(body)
         update_race_watch(raceID, max_pilots)
     else:
-        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''', (raceID, max_pilots, False, 0))
+        c.execute('''INSERT INTO races (raceID, max_pilots, notified, count) VALUES(?,?,?,?)''', (raceID, max_pilots, False, 0))
         conn.commit()
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
         if validate:
-            multiGP_AutoClose_v2.check_race(raceID, max_pilots, 0)
+            initial_count(raceID, c, conn)
             c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
             current = c.fetchone()
             body = "Added RaceID {} with a Max Pilots of {}.\n" \
@@ -208,6 +208,15 @@ def send_message(body):
     session.verify = False
 
     session.post(url, data=data)
+
+
+def initial_count(raceID, c, conn):
+    res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
+    soup = bs4.BeautifulSoup(res.text, "html.parser")
+    count = len(soup.select('.list-view .row'))
+
+    c.execute('''UPDATE races SET "count"=? WHERE raceID=?''', (count, raceID))
+    conn.commit()
 
 
 def get_db_conn():
