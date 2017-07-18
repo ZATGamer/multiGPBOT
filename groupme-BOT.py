@@ -27,7 +27,7 @@ def web_hook():
 
                 elif message[1].lower() == 'update':
                     called = 'update'
-                    update_race_watch()
+                    update_race_watch(message[2], message[3])
 
                 elif message[1].lower() == 'list':
                     called = 'list'
@@ -78,9 +78,31 @@ def list_race_watch():
     conn.close()
 
 
-def update_race_watch():
+def update_race_watch(raceID, max_pilots):
     # This will update a race already being watched.
-    return 'update'
+    body = "Updating Race {} to Max Pilots {}.".format(raceID, max_pilots)
+    send_message(body)
+
+    conn, c = get_db_conn()
+    c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+    pre_check = c.fetchone()
+    if pre_check:
+        if pre_check[2] != max_pilots:
+            c.execute('''UPDATE races SET max_pilots=? WHERE raceID=?''', (max_pilots, raceID))
+            conn.commit()
+            c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+            validate = c.fetchone()
+            if validate:
+                body = "Updated Race {} to Max Pilots of {}.".format(validate[0], validate[1])
+                send_message(body)
+        else:
+            body = "No changes made. Already watching for Max Pilots of {} for Race {}".format(max_pilots, raceID)
+            send_message(body)
+    else:
+        body = 'Race {} doesn\'t exist...\n' \
+               'Going to add it for you.'
+        send_message(body)
+        add_race_watch(raceID, max_pilots)
 
 
 def add_race_watch(raceID, max_pilots):
@@ -91,8 +113,10 @@ def add_race_watch(raceID, max_pilots):
     c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
     i_check = c.fetchone()
     if i_check:
-        body = 'Already watching RaceID {} with a Max Pilots of {}.'.format(i_check[0], i_check[1])
+        body = 'Already watching RaceID {} with a Max Pilots of {}.\n' \
+               'I am going to check to see if it needs updated.'.format(i_check[0], i_check[1])
         send_message(body)
+        update_race_watch(raceID, max_pilots)
     else:
         c.execute('''INSERT INTO races (raceID, max_pilots, notified) VALUES(?,?,?)''', (raceID, max_pilots, False))
         conn.commit()
