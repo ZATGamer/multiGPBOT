@@ -136,7 +136,7 @@ def remove_race_watch(raceID):
     c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
     i_check = c.fetchone()
     if i_check:
-        c.execute('''DELETE * FROM races WHERE raceID=?''', (raceID,))
+        c.execute('''DELETE FROM races WHERE raceID=?''', (raceID,))
         conn.commit()
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
