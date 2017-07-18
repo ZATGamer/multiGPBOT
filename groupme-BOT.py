@@ -18,7 +18,7 @@ def web_hook():
             # You have asked the bot to do something. Now do what it asks.
             if message[1].lower() == 'add':
                 called = 'add'
-                add_race_watch()
+                add_race_watch(message[2], message[3])
 
             elif message[1].lower() == 'remove':
                 called = 'remove'
@@ -53,6 +53,7 @@ def help_info():
               '!bot remove <raceID> -- Removes the specified race from the watch list.\n ' \
               '!bot list -- Lists all races currently being watched by me.\n' \
               '!bot status <raceID> -- Gets the current pilot count for specified race.'
+    print message
     send_message(message)
 
 
@@ -80,9 +81,24 @@ def update_race_watch():
     return 'update'
 
 
-def add_race_watch():
+def add_race_watch(raceID, max_pilots):
     # This will add a race to the watch list.
-    return 'add'
+    body = "Adding Race {} to watch list.".format(raceID)
+    send_message(body)
+    conn, c = get_db_conn()
+    c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+    i_check = c.fetchone()
+    if i_check:
+        body = 'Already watching RaceID {} with a Max Pilots of {}.'.format(i_check[0], i_check[1])
+        send_message(body)
+    else:
+        c.execute('''INSERT INTO races (raceID, max_pilots, notified) VALUES(?,?,?)''', (raceID, max_pilots, False))
+        conn.commit()
+        c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+        validate = c.fetchone()
+        if validate:
+            body = "Added RaceID {} with a Max Pilots of {}".format(validate[0], validate[1])
+            send_message(body)
 
 
 def remove_race_watch():
