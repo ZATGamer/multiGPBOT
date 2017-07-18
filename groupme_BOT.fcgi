@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 import logging
-from groupme-BOT import app as application
+from groupme_BOT import app as application
 
 
 logging.basicConfig(stream=sys.stderr)
