@@ -16,28 +16,32 @@ def web_hook():
         message = data['text'].split(' ')
         if message[0].lower() == '!bot':
             # You have asked the bot to do something. Now do what it asks.
-            if message[1].lower() == 'add':
-                called = 'add'
-                add_race_watch(message[2], message[3])
+            if len(message) > 1:
+                if message[1].lower() == 'add':
+                    called = 'add'
+                    add_race_watch(message[2], message[3])
 
-            elif message[1].lower() == 'remove':
-                called = 'remove'
-                remove_race_watch()
+                elif message[1].lower() == 'remove':
+                    called = 'remove'
+                    remove_race_watch()
 
-            elif message[1].lower() == 'update':
-                called = 'update'
-                update_race_watch()
+                elif message[1].lower() == 'update':
+                    called = 'update'
+                    update_race_watch()
 
-            elif message[1].lower() == 'list':
-                called = 'list'
-                list_race_watch()
+                elif message[1].lower() == 'list':
+                    called = 'list'
+                    list_race_watch()
 
-            elif message[1].lower() == 'status':
-                called = 'status'
-                get_pilot_count()
+                elif message[1].lower() == 'status':
+                    called = 'status'
+                    get_pilot_count()
 
+                else:
+                    called = 'help'
+                    help_info()
             else:
-                called = 'help'
+                called = 'Error Help'
                 help_info()
 
     return called, 200
