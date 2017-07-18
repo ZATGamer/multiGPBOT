@@ -2,6 +2,7 @@ import requests
 import ConfigParser
 from flask import Flask, request
 import sqlite3
+import multiGP_AutoClose_v2
 
 app = Flask(__name__)
 
@@ -161,7 +162,11 @@ def add_race_watch(raceID, max_pilots):
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
         if validate:
-            body = "Added RaceID {} with a Max Pilots of {}".format(validate[0], validate[1])
+            multiGP_AutoClose_v2.check_race(raceID, max_pilots, 0)
+            c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+            current = c.fetchone()
+            body = "Added RaceID {} with a Max Pilots of {}.\n" \
+                   "Race currently has {} pilots signed up.".format(current[0], current[1], current[3])
             send_message(body)
 
     conn.close()
