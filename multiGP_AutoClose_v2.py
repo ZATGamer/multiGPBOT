@@ -94,20 +94,25 @@ if __name__ == '__main__':
     c.execute('''SELECT * FROM races''')
     races = c.fetchall()
 
-    for race in races:
-        raceID = race[0]
-        max_pilots = race[1]
-        notified = race[2]
-        old_count = race[3]
+    if races:
+        print("Will Check Races.")
+        for race in races:
+            raceID = race[0]
+            max_pilots = race[1]
+            notified = race[2]
+            old_count = race[3]
+            print("Checking Race {}".format(raceID))
 
-        if not notified:
-            check_race(raceID, max_pilots, old_count)
-        else:
-            print("Already Notified deleting")
-            delete_notified(raceID)
-            c.execute('''SELECT * FROM races''')
-            test = c.fetchall()
-            for crap in test:
-                print test
+            if not notified:
+                check_race(raceID, max_pilots, old_count)
+            else:
+                print("Already Notified deleting")
+                delete_notified(raceID)
+                c.execute('''SELECT * FROM races''')
+                test = c.fetchall()
+                for crap in test:
+                    print test
+    else:
+        print("No Races to check.")
 
     conn.close()
