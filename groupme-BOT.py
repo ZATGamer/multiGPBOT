@@ -53,6 +53,7 @@ def help_info():
               '!bot remove <raceID> -- Removes the specified race from the watch list.\n ' \
               '!bot list -- Lists all races currently being watched by me.\n' \
               '!bot status <raceID> -- Gets the current pilot count for specified race.'
+    send_message(message)
 
 
 def get_pilot_count():
