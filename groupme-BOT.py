@@ -38,7 +38,7 @@ def web_hook():
 
                 elif message[1].lower() == 'status':
                     called = 'status'
-                    get_pilot_count()
+                    get_pilot_count(message[2])
 
                 else:
                     called = 'help'
