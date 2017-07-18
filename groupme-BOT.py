@@ -49,7 +49,6 @@ def web_hook():
 
 def help_info():
     # This will send a message with what I can do.
-    print 'help'
     message = '!bot help --\n' \
               'I can do the following things.\n' \
               '!bot add <raceID> <maxPilots> -- Add a race to the auto close Notify list.\n' \
@@ -57,7 +56,6 @@ def help_info():
               '!bot remove <raceID> -- Removes the specified race from the watch list.\n ' \
               '!bot list -- Lists all races currently being watched by me.\n' \
               '!bot status <raceID> -- Gets the current pilot count for specified race.'
-    print message
     send_message(message)
 
 
