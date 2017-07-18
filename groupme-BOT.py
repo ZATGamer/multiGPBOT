@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import requests
 import ConfigParser
 from flask import Flask, request
