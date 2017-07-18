@@ -1,6 +1,8 @@
 #!/usr/bin/python
-from flup.server.fcgi import WSGIServer
-from groupme-BOT import app
+import sys
+import logging
+from groupme-BOT import app as application
 
-if __name__ == '__main__':
-    WSGIServer(app).run()
+
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0,"/home/abarragree/multiGPBOT/")
