@@ -13,7 +13,7 @@ def web_hook():
 
     # make sure I didn't send the message
     if data['name'] != 'Race Full Notice':
-        message = data['message'].split(' ')
+        message = data['text'].split(' ')
         if message[0].lower() == '!bot':
             # You have asked the bot to do something. Now do what it asks.
             if message[1].lower() == 'add':
