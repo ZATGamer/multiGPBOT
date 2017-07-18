@@ -33,12 +33,16 @@ def close_race(count):
         print("Already notified.")
 
 
-def check_race(raceID, max_pilots):
+def check_race(raceID, max_pilots, old_count):
     res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
     print('Race currently has {} pilots. Out of {}. -- {}'.format(count, max_pilots, datetime.datetime.now()))
+
+    if count != old_count:
+        c.execute('''UPDATE races SET c_count=? WHERE raceID=?''', (count, raceID))
+        conn.commit()
 
     print("Count: {} Max:{}".format(count, max_pilots))
     if count >= max_pilots:
@@ -67,7 +71,7 @@ def create_db():
     db_conn = sqlite3.connect(db_path)
     db_c = db_conn.cursor()
     # Create table
-    db_c.execute('''CREATE TABLE races (raceID INTEGER PRIMARY KEY, max_pilots INTEGER, notified)''')
+    db_c.execute('''CREATE TABLE races (raceID INTEGER PRIMARY KEY, max_pilots INTEGER, notified, c_count INTEGER)''')
     db_conn.commit()
 
 
@@ -94,9 +98,10 @@ if __name__ == '__main__':
         raceID = race[0]
         max_pilots = race[1]
         notified = race[2]
+        old_count = race[3]
 
         if not notified:
-            check_race(raceID, max_pilots)
+            check_race(raceID, max_pilots, old_count)
         else:
             print("Already Notified deleting")
             delete_notified(raceID)

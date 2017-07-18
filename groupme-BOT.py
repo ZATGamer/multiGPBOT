@@ -118,7 +118,7 @@ def add_race_watch(raceID, max_pilots):
         send_message(body)
         update_race_watch(raceID, max_pilots)
     else:
-        c.execute('''INSERT INTO races (raceID, max_pilots, notified) VALUES(?,?,?)''', (raceID, max_pilots, False))
+        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''', (raceID, max_pilots, False, 0))
         conn.commit()
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
