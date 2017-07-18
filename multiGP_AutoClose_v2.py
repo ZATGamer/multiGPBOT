@@ -41,7 +41,7 @@ def check_race(raceID, max_pilots, old_count):
     print('Race currently has {} pilots. Out of {}. -- {}'.format(count, max_pilots, datetime.datetime.now()))
 
     if count != old_count:
-        c.execute('''UPDATE races SET 'c_count'=? WHERE raceID=?''', (count, raceID))
+        c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
         conn.commit()
 
     print("Count: {} Max:{}".format(count, max_pilots))
