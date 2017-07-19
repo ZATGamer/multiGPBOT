@@ -58,8 +58,9 @@ def delete_notified(raceID):
     send_notice(subject, body)
 
 
-def get_name():
+def get_name(raceID):
     try:
+        print('Getting the name of the race {}.'.format(raceID))
         # Try and get the name from rss if it is not in the DB.
         rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
         raw_race_data = requests.get(rss_url).content
@@ -133,7 +134,7 @@ if __name__ == '__main__':
             title = race[4]
 
             if not title:
-                get_name()
+                get_name(raceID)
 
             print("Checking Race {}".format(raceID))
 
