@@ -50,7 +50,6 @@ def check_race(raceID, max_pilots, old_count):
         c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
         conn.commit()
 
-    print("Count: {} Max:{}".format(count, max_pilots))
     if count >= max_pilots:
         close_race(count)
 
