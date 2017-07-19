@@ -23,8 +23,10 @@ def close_race(count):
     print("Race has Reached Limit ({} Pilots). CLOSE IT!".format(count))
     if not notified:
         print("Sending Notice")
-        body = 'Time to close the race! Has {} out of {} Pilots.\n ' \
-               'Close URL: "http://www.multigp.com/multigp/race/close/id/{}"'.format(count, max_pilots, raceID)
+        body = 'Time to close the race!\n' \
+               '{}\n' \
+               'Has {} out of {} Pilots.\n ' \
+               'Close URL: "http://www.multigp.com/multigp/race/close/id/{}"'.format(title, count, max_pilots, raceID)
         subject = "CLOSE THE RACE!"
         send_notice(subject, body)
         c.execute('''UPDATE races SET notified=? WHERE raceID=?''', (True, raceID))
@@ -39,7 +41,10 @@ def check_race(raceID, max_pilots, old_count):
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
-    print('Race currently has {} pilots. Out of {}. -- {}'.format(count, max_pilots, datetime.datetime.now()))
+    print('Race {} currently has {} pilots. Out of {}. -- {}'.format(raceID,
+                                                                     count,
+                                                                     max_pilots,
+                                                                     datetime.datetime.now()))
 
     if count != old_count:
         c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))

@@ -109,7 +109,13 @@ def list_race_watch():
     if races:
         m_body = 'Currently Watching:\n'
         for race in races:
-            m_body += 'RaceId: {}, Max Pilots: {}, Current: {}.\n'.format(race[0], race[1], race[3])
+            if not race[4]:
+                title = "Not Retrieved Yet."
+            else:
+                title = race[4]
+            m_body += 'RaceId: {}\n' \
+                      'Name: {}\n' \
+                      'Max Pilots: {}, Current: {}.\n'.format(race[0], title, race[1], race[3])
 
         send_message(m_body)
     else:
