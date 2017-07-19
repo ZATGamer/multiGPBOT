@@ -79,6 +79,7 @@ def get_name(raceID):
 
         race_title = race_data[str(raceID)]['title']
         c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_title, raceID))
+        conn.commit()
     except:
         print("Race not in RSS Yet. Will try again next run.")
 
