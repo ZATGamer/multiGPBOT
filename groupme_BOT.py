@@ -90,7 +90,7 @@ def get_pilot_count(raceID):
     r_data = c.fetchone()
 
     if r_data:
-        body = 'Race {} currently had {} pilots, with a max of {}.'.format(r_data[0], r_data[3], r_data[1])
+        body = 'Race {} currently has {} pilots, with a max of {}.'.format(r_data[0], r_data[3], r_data[1])
         send_message(body)
     else:
         body = 'I am not currently watching Race {}.\n' \
@@ -159,12 +159,13 @@ def add_race_watch(raceID, max_pilots):
         send_message(body)
         update_race_watch(raceID, max_pilots)
     else:
-        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''', (raceID, max_pilots, False, 0))
+        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''',
+                  (raceID, max_pilots, False, 0))
         conn.commit()
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
         if validate:
-            initial_count(raceID, c, conn)
+            get_count(raceID, c, conn)
             c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
             current = c.fetchone()
             body = "Added RaceID {} with a Max Pilots of {}.\n" \
@@ -212,13 +213,14 @@ def send_message(body):
     session.post(url, data=data)
 
 
-def initial_count(raceID, c, conn):
+def get_count(raceID, c, conn):
     res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
     c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
     conn.commit()
+
 
 
 def get_db_conn():
