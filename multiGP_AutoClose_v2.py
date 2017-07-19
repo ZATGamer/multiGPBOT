@@ -131,7 +131,6 @@ if __name__ == '__main__':
     races = c.fetchall()
 
     if races:
-        print("Will Check Races.")
         for race in races:
             raceID = race[0]
             max_pilots = race[1]
@@ -141,8 +140,6 @@ if __name__ == '__main__':
 
             if not title:
                 get_name(raceID)
-
-            print("Checking Race {}".format(raceID))
 
             if not notified:
                 check_race(raceID, max_pilots, old_count)
