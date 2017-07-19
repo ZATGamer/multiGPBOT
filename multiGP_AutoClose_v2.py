@@ -7,6 +7,7 @@ import email_notification
 import datetime
 import message_groupme
 import sqlite3
+import xmltodict
 
 
 def close_race(count):
@@ -52,9 +53,33 @@ def check_race(raceID, max_pilots, old_count):
 def delete_notified(raceID):
     c.execute('''DELETE FROM races WHERE raceID=?''', (raceID,))
     conn.commit()
-    subject = "Stoped Watching Race"
+    subject = "Stopped Watching Race"
     body = "I have stopped watching raceID {}".format(raceID)
     send_notice(subject, body)
+
+
+def get_name():
+    try:
+        # Try and get the name from rss if it is not in the DB.
+        rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
+        raw_race_data = requests.get(rss_url).content
+
+        # Convert the XML to something I can use
+        races_response = xmltodict.parse(raw_race_data, process_namespaces=True)
+
+        # Create a Dict of all the data using the RaceID as the Key
+        race_data = {}
+        for race in races_response['rss']['channel']['item']:
+            race_data[race['link'].split('/')[5]] = {'title': race['title'],
+                                                     'link': race['link'],
+                                                     'pubDate': race['pubDate'],
+                                                     'description': race['description'],
+                                                     'raceDate': race['title'].split('-')[-1]}
+
+        race_title = race_data[str(raceID)]['title']
+        c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_title, raceID))
+    except:
+        print("Race not in RSS Yet. Will try again next run.")
 
 
 def send_notice(subject, body):
@@ -71,7 +96,11 @@ def create_db():
     db_conn = sqlite3.connect(db_path)
     db_c = db_conn.cursor()
     # Create table
-    db_c.execute('''CREATE TABLE races (raceID INTEGER PRIMARY KEY, max_pilots INTEGER, notified, c_count INTEGER)''')
+    db_c.execute('''CREATE TABLE races (raceID INTEGER PRIMARY KEY,
+                                        max_pilots INTEGER,
+                                        notified,
+                                        c_count INTEGER,
+                                        title)''')
     db_conn.commit()
 
 
@@ -101,6 +130,11 @@ if __name__ == '__main__':
             max_pilots = race[1]
             notified = race[2]
             old_count = race[3]
+            title = race[4]
+
+            if not title:
+                get_name()
+
             print("Checking Race {}".format(raceID))
 
             if not notified:
