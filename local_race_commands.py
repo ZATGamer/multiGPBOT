@@ -114,7 +114,7 @@ def list_race_watch():
             m_body += unicode('RaceId: {}\n'
                               'Name: {}\n'
                               'Max Pilots: {}, Current: {}.\n'.format(race[0],
-                                                                      title,
+                                                                      unicode(title).encode('utf-8'),
                                                                       race[1],
                                                                       race[3])).encode('utf8')
 
