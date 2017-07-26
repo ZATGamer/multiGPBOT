@@ -31,8 +31,8 @@ def web_hook():
                     else:
                         add_race_watch(message[2], message[3])
 
-                elif message[1].lower() == 'remove':
-                    called = 'remove'
+                elif message[1].lower() == 'remove' or message[1].lower() == 'delete':
+                    called = 'remove/delete'
                     if len(message) < 3:
                         missing_info()
                     else:
@@ -78,7 +78,7 @@ def help_info():
               'I can do the following things.\n' \
               '!bot add <raceID> <maxPilots> -- Add a race to the auto close Notify list.\n' \
               '!bot update <raceID> <maxPilots> -- Updates the specified race\'s maxPilots\n' \
-              '!bot remove <raceID> -- Removes the specified race from the watch list.\n ' \
+              '!bot remove OR delete <raceID> -- Removes the specified race from the watch list.\n ' \
               '!bot list -- Lists all races currently being watched by me.\n' \
               '!bot status <raceID> -- Gets the current pilot count for specified race.'
     send_message(message)
