@@ -105,7 +105,7 @@ def list_race_watch():
     races = c.fetchall()
 
     if races:
-        m_body = 'Currently Watching:\n'
+        m_body = unicode('Currently Watching:\n').encode('utf8')
         for race in races:
             if not race[4]:
                 title = "Not Retrieved Yet."
