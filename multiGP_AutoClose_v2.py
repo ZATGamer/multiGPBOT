@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# coding: utf8
 
 import ConfigParser
 import bs4, requests

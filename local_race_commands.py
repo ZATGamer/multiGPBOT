@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# coding: utf8
 
 import requests
 import ConfigParser
@@ -105,18 +104,16 @@ def list_race_watch():
     races = c.fetchall()
 
     if races:
-        m_body = unicode('Currently Watching:\n').encode('utf8')
+        m_body = 'Currently Watching:\n'
         for race in races:
             if not race[4]:
                 title = "Not Retrieved Yet."
             else:
-                title = race[4]
-            m_body += unicode('RaceId: {}\n'
-                              'Name: {}\n'
-                              'Max Pilots: {}, Current: {}.\n'.format(race[0],
-                                                                      unicode(title).encode('utf-8'),
-                                                                      race[1],
-                                                                      race[3])).encode('utf8')
+                title = unicode(race[4]).encode('utf-8')
+
+            m_body += 'RaceId: {}\n' \
+                      'Name: {}\n' \
+                      'Max Pilots: {}, Current: {}.\n'.format(race[0], title, race[1], race[3])
 
         print(m_body)
     else:
