@@ -9,7 +9,7 @@ import sys
 
 
 def web_hook():
-    data = {'name': 'BOTName', 'text': sys.argv[1]}
+    data = {'name': 'Manual', 'text': sys.argv[1]}
     called = ''
 
     config = ConfigParser.RawConfigParser()
