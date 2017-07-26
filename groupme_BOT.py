@@ -107,7 +107,8 @@ def list_race_watch():
     races = c.fetchall()
 
     if races:
-        m_body = 'Currently Watching:\n'
+        m_body = 'Currently Watching:\n' \
+                 '---------\n'
         for race in races:
             if not race[4]:
                 title = "Not Retrieved Yet."
@@ -116,7 +117,8 @@ def list_race_watch():
 
             m_body += 'RaceId: {}\n' \
                       'Name: {}\n' \
-                      'Max Pilots: {}, Current: {}.\n'.format(race[0], title, race[1], race[3])
+                      'Max Pilots: {}, Current: {}.\n' \
+                      '---------\n'.format(race[0], title, race[1], race[3])
 
         send_message(m_body)
     else:
