@@ -111,9 +111,12 @@ def list_race_watch():
                 title = "Not Retrieved Yet."
             else:
                 title = race[4]
-            m_body += 'RaceId: {}\n' \
-                      'Name: {}\n' \
-                      'Max Pilots: {}, Current: {}.\n'.format(race[0], title, race[1], race[3])
+            m_body += unicode('RaceId: {}\n'
+                              'Name: {}\n'
+                              'Max Pilots: {}, Current: {}.\n'.format(race[0],
+                                                                      title,
+                                                                      race[1],
+                                                                      race[3])).encode('utf8')
 
         print(m_body)
     else:
