@@ -153,7 +153,13 @@ if __name__ == '__main__':
                 get_name(raceID)
 
             if not notified:
-                check_race(raceID, max_pilots, old_count)
+                if is_closed(raceID):
+                    # Delete if the race is closed.
+                    body = "Race {} has been Closed...".format(raceID)
+                    send_notice(subject='', body=body)
+                    delete_notified(raceID)
+                else:
+                    check_race(raceID, max_pilots, old_count)
             else:
                 # Delete after notified
                 print("Already Notified deleting")
@@ -162,12 +168,6 @@ if __name__ == '__main__':
                 test = c.fetchall()
                 for crap in test:
                     print test
-
-            if is_closed(raceID):
-                # Delete if the race is closed.
-                body = "Race {} has been Closed...".format(raceID)
-                send_notice(subject='', body=body)
-                delete_notified(raceID)
 
     else:
         print("No Races to check.")
