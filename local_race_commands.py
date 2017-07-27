@@ -65,7 +65,7 @@ def web_hook():
 
 def missing_info():
     body = "Missing required parameter."
-    print(body)
+    send_message(body)
     help_info()
 
 
@@ -89,12 +89,12 @@ def get_pilot_count(raceID):
 
     if r_data:
         body = 'Race {} currently has {} pilots, with a max of {}.'.format(r_data[0], r_data[3], r_data[1])
-        print(body)
+        send_message(body)
     else:
         body = 'I am not currently watching Race {}.\n' \
                'This could be because it has reached it\'s limit and I stopped watching.\n' \
                'Or I wasn\'t watching it.'
-        print(body)
+        send_message(body)
 
 
 def list_race_watch():
@@ -120,14 +120,14 @@ def list_race_watch():
         print(m_body)
     else:
         body = 'I am not currently watching any Races.'
-        print(body)
+        send_message(body)
     conn.close()
 
 
 def update_race_watch(raceID, max_pilots):
     # This will update a race already being watched.
     body = "Updating Race {} to Max Pilots {}.".format(raceID, max_pilots)
-    print(body)
+    send_message(body)
 
     conn, c = get_db_conn()
     c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
@@ -140,14 +140,14 @@ def update_race_watch(raceID, max_pilots):
             validate = c.fetchone()
             if validate:
                 body = "Updated Race {} to Max Pilots of {}.".format(validate[0], validate[1])
-                print(body)
+                send_message(body)
         else:
             body = "No changes made. Already watching for Max Pilots of {} for Race {}".format(max_pilots, raceID)
-            print(body)
+            send_message(body)
     else:
         body = 'Race {} doesn\'t exist...\n' \
                'Going to add it for you.'.format(raceID)
-        print(body)
+        send_message(body)
         add_race_watch(raceID, max_pilots)
 
     conn.close()
@@ -156,14 +156,14 @@ def update_race_watch(raceID, max_pilots):
 def add_race_watch(raceID, max_pilots):
     # This will add a race to the watch list.
     body = "Adding Race {} to watch list.".format(raceID)
-    print(body)
+    send_message(body)
     conn, c = get_db_conn()
     c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
     i_check = c.fetchone()
     if i_check:
         body = 'Already watching RaceID {} with a Max Pilots of {}.\n' \
                'I am going to check to see if it needs updated.'.format(i_check[0], i_check[1])
-        print(body)
+        send_message(body)
         update_race_watch(raceID, max_pilots)
     else:
         c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''',
@@ -177,7 +177,7 @@ def add_race_watch(raceID, max_pilots):
             current = c.fetchone()
             body = "Added RaceID {} with a Max Pilots of {}.\n" \
                    "Race currently has {} pilots signed up.".format(current[0], current[1], current[3])
-            print(body)
+            send_message(body)
 
     conn.close()
 
@@ -185,7 +185,7 @@ def add_race_watch(raceID, max_pilots):
 def remove_race_watch(raceID):
     # This will remove a race from the watch list.
     body = 'Removing Race {} from the watch list.'.format(raceID)
-    print(body)
+    send_message(body)
 
     conn, c = get_db_conn()
     c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
@@ -197,27 +197,16 @@ def remove_race_watch(raceID):
         validate = c.fetchone()
         if not validate:
             body = "I have stopped watching Race {}.".format(raceID)
-            print(body)
+            send_message(body)
     else:
         body = "I was not watching Race {}".format(raceID)
-        print(body)
+        send_message(body)
 
     conn.close()
 
 
 def send_message(body):
-    config = ConfigParser.RawConfigParser()
-    config.read('./config.ini')
-
-    url = config.get('GroupMe', 'api_url')
-    bot_id = config.get('GroupMe', 'bot_id')
-
-    data = {"text": body, "bot_id": bot_id}
-
-    session = requests.session()
-    session.verify = False
-
-    session.post(url, data=data)
+    print(body)
 
 
 def initial_data_grab(raceID, c, conn):
