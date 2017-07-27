@@ -165,7 +165,7 @@ if __name__ == '__main__':
 
             if is_closed(raceID):
                 # Delete if the race is closed.
-                body = "Race is Closed..."
+                body = "Race {} is Closed...".format(raceID)
                 send_notice(subject='', body=body)
                 delete_notified(raceID)
 
