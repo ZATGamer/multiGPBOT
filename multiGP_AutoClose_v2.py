@@ -88,6 +88,18 @@ def get_name(raceID):
         print("Race not in RSS Yet. Will try again next run.")
 
 
+def is_closed(raceID):
+    res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
+    soup = bs4.BeautifulSoup(res.text, "html.parser")
+    status = soup.select_one('.fixed').getText()
+    status = status.strip().lower()
+
+    if status == 'closed':
+        return True
+    else:
+        return False
+
+
 def send_notice(subject, body):
     # email_notification.send_notification(subject, body)
     message_groupme.send_message(body)
@@ -143,12 +155,20 @@ if __name__ == '__main__':
             if not notified:
                 check_race(raceID, max_pilots, old_count)
             else:
+                # Delete after notified
                 print("Already Notified deleting")
                 delete_notified(raceID)
                 c.execute('''SELECT * FROM races''')
                 test = c.fetchall()
                 for crap in test:
                     print test
+
+            if is_closed(raceID):
+                # Delete if the race is closed.
+                body = "Race is Closed..."
+                send_notice(subject='', body=body)
+                delete_notified(raceID)
+
     else:
         print("No Races to check.")
 
