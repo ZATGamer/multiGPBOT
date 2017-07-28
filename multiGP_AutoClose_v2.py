@@ -10,7 +10,7 @@ import sqlite3
 import xmltodict
 
 
-def close_race(count):
+def send_close_notice(count):
     close_url = ''
     # close_url = 'http://www.multigp.com/multigp/race/close/id/9369'
     # print(close_url)
@@ -50,15 +50,14 @@ def check_race(raceID, max_pilots, old_count):
         c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
         conn.commit()
 
-    if count >= max_pilots:
-        close_race(count)
+    return count
 
 
-def delete_notified(raceID):
+def stop_watching(raceID):
     c.execute('''DELETE FROM races WHERE raceID=?''', (raceID,))
     conn.commit()
     subject = "Stopped Watching Race"
-    body = "I have stopped watching raceID {}".format(raceID)
+    body = "Race {} has been closed.".format(raceID)
     send_notice(subject, body)
 
 
@@ -152,22 +151,13 @@ if __name__ == '__main__':
             if not title:
                 get_name(raceID)
 
-            if not notified:
-                if is_closed(raceID):
-                    # Delete if the race is closed.
-                    body = "Race {} has been Closed...".format(raceID)
-                    send_notice(subject='', body=body)
-                    delete_notified(raceID)
-                else:
-                    check_race(raceID, max_pilots, old_count)
-            else:
-                # Delete after notified
-                print("Already Notified deleting")
-                delete_notified(raceID)
-                c.execute('''SELECT * FROM races''')
-                test = c.fetchall()
-                for crap in test:
-                    print test
+            count = check_race(raceID, max_pilots, old_count)
+
+            if count >= max_pilots:
+                send_close_notice(count)
+
+            if is_closed(raceID):
+                stop_watching(raceID)
 
     else:
         print("No Races to check.")
