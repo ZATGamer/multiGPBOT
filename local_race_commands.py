@@ -210,7 +210,7 @@ def send_message(body):
 
 
 def initial_data_grab(raceID, c, conn):
-    res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
+    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
