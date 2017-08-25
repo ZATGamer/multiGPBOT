@@ -63,32 +63,41 @@ def stop_watching(raceID):
 
 
 def get_name(raceID):
-    # TODO: FIX THIS
-    # This is currently broken. With the site upgrade they appeared to of gotten rid of the RSS Feed.
+    print('Getting the name of the race {}.'.format(raceID))
+    
+    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
+    soup = bs4.BeautifulSoup(res.text, "html.parser")
+    race_name = soup.select_one('h1').getText()
+    race_name = race_name.strip()
+    race_name = race_name.split('\n')
+    race_name = race_name[0]
 
-    try:
-        print('Getting the name of the race {}.'.format(raceID))
-        # Try and get the name from rss if it is not in the DB.
-        rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
-        raw_race_data = requests.get(rss_url).content
+    c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_name, raceID))
+    conn.commit()
 
-        # Convert the XML to something I can use
-        races_response = xmltodict.parse(raw_race_data, process_namespaces=True)
-
-        # Create a Dict of all the data using the RaceID as the Key
-        race_data = {}
-        for race in races_response['rss']['channel']['item']:
-            race_data[race['link'].split('/')[5]] = {'title': race['title'],
-                                                     'link': race['link'],
-                                                     'pubDate': race['pubDate'],
-                                                     'description': race['description'],
-                                                     'raceDate': race['title'].split('-')[-1]}
-
-        race_title = race_data[str(raceID)]['title']
-        c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_title, raceID))
-        conn.commit()
-    except:
-        print("Race not in RSS Yet. Will try again next run.")
+    # try:
+    #     print('Getting the name of the race {}.'.format(raceID))
+    #     # Try and get the name from rss if it is not in the DB.
+    #     rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
+    #     raw_race_data = requests.get(rss_url).content
+    #
+    #     # Convert the XML to something I can use
+    #     races_response = xmltodict.parse(raw_race_data, process_namespaces=True)
+    #
+    #     # Create a Dict of all the data using the RaceID as the Key
+    #     race_data = {}
+    #     for race in races_response['rss']['channel']['item']:
+    #         race_data[race['link'].split('/')[5]] = {'title': race['title'],
+    #                                                  'link': race['link'],
+    #                                                  'pubDate': race['pubDate'],
+    #                                                  'description': race['description'],
+    #                                                  'raceDate': race['title'].split('-')[-1]}
+    #
+    #     race_title = race_data[str(raceID)]['title']
+    #     c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_title, raceID))
+    #     conn.commit()
+    # except:
+    #     print("Race not in RSS Yet. Will try again next run.")
 
 
 def is_closed(raceID):
@@ -152,9 +161,8 @@ if __name__ == '__main__':
             old_count = race[3]
             title = race[4]
 
-            # TODO: FIX THIS (Broken with MultiGP site Update)
-            # if not title:
-            #     get_name(raceID)
+            if not title:
+                get_name(raceID)
 
             count = check_race(raceID, max_pilots, old_count)
 
