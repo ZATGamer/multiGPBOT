@@ -63,6 +63,9 @@ def stop_watching(raceID):
 
 
 def get_name(raceID):
+    # TODO: FIX THIS
+    # This is currently broken. With the site upgrade they appeared to of gotten rid of the RSS Feed.
+
     try:
         print('Getting the name of the race {}.'.format(raceID))
         # Try and get the name from rss if it is not in the DB.
@@ -149,8 +152,9 @@ if __name__ == '__main__':
             old_count = race[3]
             title = race[4]
 
-            if not title:
-                get_name(raceID)
+            # TODO: FIX THIS (Broken with MultiGP site Update)
+            # if not title:
+            #     get_name(raceID)
 
             count = check_race(raceID, max_pilots, old_count)
 
