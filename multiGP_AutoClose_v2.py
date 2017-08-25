@@ -37,7 +37,8 @@ def send_close_notice(count):
 
 
 def check_race(raceID, max_pilots, old_count):
-    res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
+    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
+    # res = requests.get('http://www.multigp.com/mgp/races/view/{}/')
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
