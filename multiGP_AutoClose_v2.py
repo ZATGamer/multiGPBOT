@@ -11,8 +11,8 @@ import xmltodict
 
 
 def send_close_notice(count):
-    close_url = ''
-    # close_url = 'http://www.multigp.com/multigp/race/close/id/9369'
+    # close_url = ''
+    # close_url = 'http://www.multigp.com/mgp/multigp/race/close/id/10051'
     # print(close_url)
     # close_race_code = session.post(close_url)
     # close_race_code = session.get(close_url)
@@ -26,7 +26,7 @@ def send_close_notice(count):
         body = 'Time to close the race!\n' \
                '{}\n' \
                'Has {} out of {} Pilots.\n ' \
-               'Close URL: "http://www.multigp.com/multigp/race/close/id/{}"'.format(title, count, max_pilots, raceID)
+               'Close URL: "http://www.multigp.com/mgp/multigp/race/close/id/{}"'.format(title, count, max_pilots, raceID)
         subject = "CLOSE THE RACE!"
         send_notice(subject, body)
         c.execute('''UPDATE races SET notified=? WHERE raceID=?''', (True, raceID))
