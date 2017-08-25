@@ -89,7 +89,7 @@ def get_name(raceID):
 
 
 def is_closed(raceID):
-    res = requests.get('http://www.multigp.com/races/view/{}/'.format(raceID))
+    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     status = soup.select_one('.fixed').getText()
     status = status.strip().lower()
