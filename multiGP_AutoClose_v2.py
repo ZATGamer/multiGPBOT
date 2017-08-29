@@ -120,8 +120,10 @@ def is_closed(raceID):
     status = status.strip().lower()
 
     if status == 'closed':
+        print("Race Closed")
         return True
     else:
+        print("Race Still Open")
         return False
 
 
