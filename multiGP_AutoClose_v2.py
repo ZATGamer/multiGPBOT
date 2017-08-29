@@ -36,6 +36,19 @@ def send_close_notice(count):
         print("Already notified.")
 
 
+def close_race():
+    print("Logging In.")
+    login()
+
+    print("Closing the Race")
+    session.get("http://www.multigp.com/mgp/multigp/race/close/id/{}".format(raceID))
+    body = 'I have tried to close the race.\n' \
+           'If you don\'t see the Race XXX has been closed Message ' \
+           'within the next minute please press the link that I sent.'
+    subject = ""
+    send_notice(subject, body)
+
+
 def check_race(raceID, max_pilots, old_count):
     res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
     # res = requests.get('http://www.multigp.com/mgp/races/view/{}/')
@@ -64,7 +77,7 @@ def stop_watching(raceID):
 
 def get_name(raceID):
     print('Getting the name of the race {}.'.format(raceID))
-    
+
     res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     race_name = soup.select_one('h1').getText()
@@ -117,6 +130,17 @@ def send_notice(subject, body):
     message_groupme.send_message(body)
 
 
+def login():
+    login_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('multiGP', 'login_uri'))
+    login_info = {'LoginForm[username]': config.get('multiGP', 'username'),
+                  'LoginForm[password]': config.get('multiGP', 'password'),
+                  'yt0': 'Log in'
+                  }
+
+    response = requests.post(login_url, data=login_info, allow_redirects=False)
+    session.cookies = response.cookies
+
+
 def create_db():
     print('Running first time db setup.')
     db_path = config.get('database', 'auto_close')
@@ -153,6 +177,8 @@ if __name__ == '__main__':
     c.execute('''SELECT * FROM races''')
     races = c.fetchall()
 
+    session = requests.Session()
+
     if races:
         for race in races:
             raceID = race[0]
@@ -167,6 +193,7 @@ if __name__ == '__main__':
             count = check_race(raceID, max_pilots, old_count)
 
             if count >= max_pilots:
+                close_race()
                 send_close_notice(count)
 
             if is_closed(raceID):
