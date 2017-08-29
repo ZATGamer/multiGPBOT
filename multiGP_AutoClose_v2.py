@@ -42,9 +42,8 @@ def close_race():
 
     print("Closing the Race")
     session.get("http://www.multigp.com/mgp/multigp/race/close/id/{}".format(raceID))
-    body = 'I have tried to close the race.\n' \
-           'If you don\'t see the Race XXX has been closed Message ' \
-           'within the next minute please press the link that I sent.'
+    body = 'I have tried to close the race.' \
+           'If you don\'t see a Race Closed message Next. Click the link'
     subject = ""
     send_notice(subject, body)
 
@@ -71,7 +70,8 @@ def stop_watching(raceID):
     c.execute('''DELETE FROM races WHERE raceID=?''', (raceID,))
     conn.commit()
     subject = "Stopped Watching Race"
-    body = "Race {} has been closed.".format(raceID)
+    body = "Race {} has been closed.\n" \
+           "(Either someone pressed the link or Auto Close worked.)".format(raceID)
     send_notice(subject, body)
 
 
@@ -129,7 +129,7 @@ def is_closed(raceID):
 
 def send_notice(subject, body):
     # email_notification.send_notification(subject, body)
-    #message_groupme.send_message(body)
+    message_groupme.send_message(body)
     pass
 
 
@@ -201,7 +201,6 @@ if __name__ == '__main__':
 
             if is_closed(raceID):
                 stop_watching(raceID)
-
 
     else:
         print("No Races to check.")
