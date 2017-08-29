@@ -127,7 +127,8 @@ def is_closed(raceID):
 
 def send_notice(subject, body):
     # email_notification.send_notification(subject, body)
-    message_groupme.send_message(body)
+    #message_groupme.send_message(body)
+    pass
 
 
 def login():
