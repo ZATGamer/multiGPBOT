@@ -194,11 +194,12 @@ if __name__ == '__main__':
             count = check_race(raceID, max_pilots, old_count)
 
             if count >= max_pilots:
-                close_race()
                 send_close_notice(count)
 
             if is_closed(raceID):
                 stop_watching(raceID)
+            else:
+                close_race()
 
     else:
         print("No Races to check.")
