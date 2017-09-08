@@ -67,7 +67,7 @@ def web_hook():
     return called, 200
 
 
-@app.route('/calendar/<int:raceID>', methods=['GET'])
+# @app.route('/calendar/<int:raceID>', methods=['GET'])
 @app.route('/calendar/<int:raceID>/', methods=['GET'])
 def calendar(raceID):
     generate_ics.generate_ics(raceID)
