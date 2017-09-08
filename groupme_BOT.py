@@ -2,9 +2,10 @@
 
 import requests
 import ConfigParser
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 import sqlite3
 import bs4
+import generate_ics as ics
 
 
 app = Flask(__name__)
@@ -64,6 +65,12 @@ def web_hook():
                 help_info()
 
     return called, 200
+
+
+@app.route('/calendar/<int:raceID>', methods=['GET'])
+def calendar(raceID):
+    ics.generate_ics(raceID)
+    return send_from_directory(directory='./ics/', filename="{}.ics".format(raceID))
 
 
 def missing_info():
