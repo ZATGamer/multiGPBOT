@@ -71,7 +71,7 @@ def web_hook():
 @app.route('/calendar/<int:raceID>/', methods=['GET'])
 def calendar(raceID):
     generate_ics.generate_ics(raceID)
-    return send_from_directory(directory='./ics/', filename="{}.ics".format(raceID))
+    return send_from_directory(directory='ics', filename="{}.ics".format(raceID))
 
 
 def missing_info():
