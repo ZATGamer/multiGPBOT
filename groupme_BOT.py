@@ -27,10 +27,12 @@ def web_hook():
             if len(message) > 1:
                 if message[1].lower() == 'add':
                     called = 'add'
-                    if len(message) < 4:
-                        missing_info()
-                    else:
+                    if len(message) == 4:
                         add_race_watch(message[2], message[3])
+                    elif len(message) == 3:
+                        add_race_watch(message[2], '24')
+                    elif len(message) < 3:
+                        missing_info()
 
                 elif message[1].lower() == 'remove' or message[1].lower() == 'delete':
                     called = 'remove/delete'
