@@ -9,5 +9,7 @@ if __name__ == '__main__':
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    c.execute('''ALTER TABLE races ADD COLUMN title''')
+    c.execute('''ALTER TABLE races ADD COLUMN date DATETIME''')
+    c.execute('''ALTER TABLE races ADD COLUMN closed BOOL''')
+    c.execute('''ALTER TABLE races ADD COLUMN url''')
     conn.commit()

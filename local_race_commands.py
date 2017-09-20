@@ -23,10 +23,12 @@ def web_hook():
             if len(message) > 1:
                 if message[1].lower() == 'add':
                     called = 'add'
-                    if len(message) < 4:
-                        missing_info()
-                    else:
+                    if len(message) == 4:
                         add_race_watch(message[2], message[3])
+                    elif len(message) == 3:
+                        add_race_watch(message[2], '24')
+                    elif len(message) < 3:
+                        missing_info()
 
                 elif message[1].lower() == 'remove' or message[1].lower() == 'delete':
                     called = 'remove/delete'
@@ -72,12 +74,14 @@ def missing_info():
 def help_info():
     # This will send a message with what I can do.
     message = '!bot help --\n' \
-              'I can do the following things.\n' \
-              '!bot add <raceID> <maxPilots> -- Add a race to the auto close Notify list.\n' \
-              '!bot update <raceID> <maxPilots> -- Updates the specified race\'s maxPilots\n' \
-              '!bot remove OR delete <raceID> -- Removes the specified race from the watch list.\n ' \
-              '!bot list -- Lists all races currently being watched by me.\n' \
+              'I can do the following things.\n\n' \
+              '!bot add <raceID> <maxPilots> -- Add a race to the auto close Notify list. Defaults to 24 pilots ' \
+              'if none specified\n\n' \
+              '!bot update <raceID> <maxPilots> -- Updates the specified race\'s maxPilots\n\n' \
+              '!bot remove OR delete <raceID> -- Removes the specified race from the watch list.\n\n' \
+              '!bot list -- Lists all races currently being watched by me.\n\n' \
               '!bot status <raceID> -- Gets the current pilot count for specified race.'
+
     print(message)
 
 
@@ -115,7 +119,8 @@ def list_race_watch():
             m_body += 'RaceId: {}\n' \
                       'Name: {}\n' \
                       'Max Pilots: {}, Current: {}.\n' \
-                      '---------\n'.format(race[0], title, race[1], race[3])
+                      'Url: {}\n' \
+                      '---------\n'.format(race[0], title, race[1], race[3], race[7])
 
         print(m_body)
     else:
@@ -155,6 +160,9 @@ def update_race_watch(raceID, max_pilots):
 
 def add_race_watch(raceID, max_pilots):
     # This will add a race to the watch list.
+    config = ConfigParser.RawConfigParser()
+    config.read('./config.ini')
+    url = "{}{}{}/".format(config.get('multiGP', 'url'), config.get('multiGP', 'fancy_view_uri'), raceID)
     body = "Adding Race {} to watch list.".format(raceID)
     send_message(body)
     conn, c = get_db_conn()
@@ -166,8 +174,8 @@ def add_race_watch(raceID, max_pilots):
         send_message(body)
         update_race_watch(raceID, max_pilots)
     else:
-        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count) VALUES(?,?,?,?)''',
-                  (raceID, max_pilots, False, 0))
+        c.execute('''INSERT INTO races (raceID, max_pilots, notified, c_count, url) VALUES(?,?,?,?,?)''',
+                  (raceID, max_pilots, False, 0, url))
         conn.commit()
         c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
         validate = c.fetchone()
@@ -176,7 +184,8 @@ def add_race_watch(raceID, max_pilots):
             c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
             current = c.fetchone()
             body = "Added RaceID {} with a Max Pilots of {}.\n" \
-                   "Race currently has {} pilots signed up.".format(current[0], current[1], current[3])
+                   "Race currently has {} pilots signed up.\n" \
+                   "Race URL: {}".format(current[0], current[1], current[3], url)
             send_message(body)
 
     conn.close()
@@ -210,7 +219,7 @@ def send_message(body):
 
 
 def initial_data_grab(raceID, c, conn):
-    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
+    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID), verify=False)
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.list-view .row'))
 
