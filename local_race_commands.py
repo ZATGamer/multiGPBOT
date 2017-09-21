@@ -113,6 +113,14 @@ def list_race_watch():
         m_body = 'Currently Watching:\n' \
                  '---------\n'
         for race in races:
+            current_status = race[6]
+            if current_status:
+                current_status = "Closed"
+            elif current_status is None:
+                current_status = "Unknown"
+            elif not current_status:
+                current_status = "Open"
+
             if not race[4]:
                 title = "Not Retrieved Yet."
             else:
@@ -121,8 +129,9 @@ def list_race_watch():
             m_body += 'RaceId: {}\n' \
                       'Name: {}\n' \
                       'Max Pilots: {}, Current: {}.\n' \
+                      'Current Status: {}\n' \
                       'Url: {}\n' \
-                      '---------\n'.format(race[0], title, race[1], race[3], race[7])
+                      '---------\n'.format(race[0], title, race[1], race[3], current_status, race[7])
 
         print(m_body)
     else:
