@@ -3,11 +3,9 @@
 import ConfigParser
 import bs4, requests
 import os
-import email_notification
 import datetime
 import message_groupme
 import sqlite3
-import xmltodict
 
 
 def send_close_notice(count):
@@ -36,22 +34,28 @@ def send_close_notice(count):
         print("Already notified.")
 
 
-def close_race():
+def close_race(notified, attempt, raceID, closeurl):
     print("Logging In.")
     login()
 
     print("Closing the Race")
-    session.get("http://www.multigp.com/mgp/multigp/race/close/id/{}".format(raceID))
-    body = 'I have tried to close the race.' \
-           'If you don\'t see a Race Closed message Next. Click the link'
-    subject = ""
-    send_notice(subject, body)
+    test = session.get(closeurl)
+    print test.status_code
+    attempt += 1
+    if not notified:
+        body = 'I have tried to close the race.\n' \
+               'If you don\'t see a Race Closed message Next. Click the link'
+        subject = ""
+        send_notice(subject, body)
+        c.execute('''UPDATE races SET notified=? WHERE raceID=?''', (True, raceID))
+
+    c.execute('''UPDATE races SET attempt=? WHERE raceID=?''', (attempt, raceID))
+    conn.commit()
+    return attempt
 
 
-def check_race(raceID, max_pilots, old_count):
-    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
-    # res = requests.get('http://www.multigp.com/mgp/races/view/{}/')
-    soup = bs4.BeautifulSoup(res.text, "html.parser")
+def check_race(soup, raceID, max_pilots, old_count):
+
     count = len(soup.select('.list-view .row'))
 
     print('Race {} currently has {} pilots. Out of {}. -- {}'.format(raceID,
@@ -75,11 +79,9 @@ def stop_watching(raceID):
     send_notice(subject, body)
 
 
-def get_name(raceID):
+def get_name(soup, raceID):
     print('Getting the name of the race {}.'.format(raceID))
 
-    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
-    soup = bs4.BeautifulSoup(res.text, "html.parser")
     race_name = soup.select_one('h1').getText()
     race_name = race_name.strip()
     race_name = race_name.split('\n')
@@ -88,34 +90,35 @@ def get_name(raceID):
     c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_name, raceID))
     conn.commit()
 
-    # try:
-    #     print('Getting the name of the race {}.'.format(raceID))
-    #     # Try and get the name from rss if it is not in the DB.
-    #     rss_url = '{}{}'.format(config.get('multiGP', 'url'), config.get('chapter', 'rss_uri'))
-    #     raw_race_data = requests.get(rss_url).content
-    #
-    #     # Convert the XML to something I can use
-    #     races_response = xmltodict.parse(raw_race_data, process_namespaces=True)
-    #
-    #     # Create a Dict of all the data using the RaceID as the Key
-    #     race_data = {}
-    #     for race in races_response['rss']['channel']['item']:
-    #         race_data[race['link'].split('/')[5]] = {'title': race['title'],
-    #                                                  'link': race['link'],
-    #                                                  'pubDate': race['pubDate'],
-    #                                                  'description': race['description'],
-    #                                                  'raceDate': race['title'].split('-')[-1]}
-    #
-    #     race_title = race_data[str(raceID)]['title']
-    #     c.execute('''UPDATE races SET title=? WHERE raceID=?''', (race_title, raceID))
-    #     conn.commit()
-    # except:
-    #     print("Race not in RSS Yet. Will try again next run.")
+
+def update_status(soup, raceID, closed):
+    if closed == None:
+        print('updating closed')
+        c.execute('''UPDATE races SET closed=? WHERE raceID=?''', (False, raceID))
+        conn.commit()
+
+    status = soup.select_one('.fixed').getText()
+    status = status.strip().lower()
+
+    if status == 'closed':
+        print("Site shows race as closed.")
+        if not closed:
+            print("Not closed in the DB but closed on the site Updating it.")
+            c.execute('''UPDATE races SET closed=? WHERE raceID=?''', (True, raceID))
+            conn.commit()
+
+        print("Race Closed")
+
+    else:
+        if closed:
+            print("Closed in the DB but not on the site Updating it.")
+            c.execute('''UPDATE races SET closed=? WHERE raceID=?''', (False, raceID))
+            conn.commit()
+
+        print("Race Still Open")
 
 
-def is_closed(raceID):
-    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
-    soup = bs4.BeautifulSoup(res.text, "html.parser")
+def is_closed(soup, raceID):
     status = soup.select_one('.fixed').getText()
     status = status.strip().lower()
 
@@ -130,7 +133,6 @@ def is_closed(raceID):
 def send_notice(subject, body):
     # email_notification.send_notification(subject, body)
     message_groupme.send_message(body)
-    pass
 
 
 def login():
@@ -140,7 +142,7 @@ def login():
                   'yt0': 'Log in'
                   }
 
-    response = requests.post(login_url, data=login_info, allow_redirects=False)
+    response = requests.post(login_url, data=login_info, allow_redirects=False, verify=False)
     session.cookies = response.cookies
 
 
@@ -157,7 +159,7 @@ def create_db():
                                         max_pilots INTEGER,
                                         notified,
                                         c_count INTEGER,
-                                        title)''')
+                                        title, date, closed, url, try)''')
     db_conn.commit()
 
 
@@ -165,6 +167,12 @@ def start_up():
     # stuff to run at start up. Does basic check like if the DB has been created or not. If not then create it.
     if not os.path.exists(config.get('database', 'auto_close')):
         create_db()
+
+
+def get_soup(url):
+    res = session.get(url, verify=False)
+    soup = bs4.BeautifulSoup(res.text, "html.parser")
+    return soup
 
 
 if __name__ == '__main__':
@@ -189,18 +197,54 @@ if __name__ == '__main__':
             notified = race[2]
             old_count = race[3]
             title = race[4]
+            date = datetime.datetime.strptime(race[5], '%Y-%m-%d %H:%M:%S')
+            closed = race[6]
+            attempt = race[8]
+            if attempt == None:
+                attempt = int(0)
+            else:
+                attempt = int(attempt)
+
+
+            view_url = "{}{}{}/".format(config.get('multiGP', 'url'), config.get('multiGP', 'view_uri'), raceID)
+            close_url = "{}{}{}/".format(config.get('multiGP', 'url'), config.get('multiGP', 'close_uri'), raceID)
+            print close_url
+            login_url = "{}{}".format(config.get('multiGP', 'url'), config.get('multiGP', 'login_uri'))
+
+            view_soup = get_soup(view_url)
 
             if not title:
-                get_name(raceID)
+                get_name(view_soup, raceID)
 
-            count = check_race(raceID, max_pilots, old_count)
+            if not closed:
+                count = check_race(view_soup, raceID, max_pilots, old_count)
+                update_status(view_soup, raceID, closed)
 
-            if count >= max_pilots:
-                send_close_notice(count)
-                close_race()
+                if count >= max_pilots:
+                    # We should close the race
+                    attempt = close_race(notified, attempt, raceID, close_url)
+                    view_soup = get_soup(view_url)
+                    update_status(view_soup, raceID, closed)
 
-            if is_closed(raceID):
-                stop_watching(raceID)
+                elif datetime.datetime.now() > date:
+                    attempt = close_race(notified, attempt, raceID, close_url)
+                    view_soup = get_soup(view_url)
+                    update_status(view_soup, raceID, closed)
+
+                if attempt == 2 and count >= max_pilots:
+                    print ("Send attempt notice")
+                    body = 'I am having troubles closing {}! Please manually close\n' \
+                           '{}'.format(raceID, close_url)
+                    send_notice('blah', body)
+
+                elif attempt == 2 and datetime.datetime.now() > date:
+                    body = 'Race {} Date has passed. I have tried to close the race but am having issues.\n' \
+                           'Please close it manually.\n' \
+                           '{}'.format(raceID, close_url)
+                    send_notice('blah', body)
+            else:
+                if datetime.datetime.now() > date:
+                    stop_watching(raceID)
 
     else:
         print("No Races to check.")
