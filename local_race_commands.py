@@ -6,6 +6,8 @@ from flask import Flask, request
 import sqlite3
 import bs4
 import sys
+import datetime
+import time
 
 
 def web_hook():
@@ -158,6 +160,27 @@ def update_race_watch(raceID, max_pilots):
     conn.close()
 
 
+def get_date_time(soup, conn, c, raceID):
+    # Digging out the Date/Time
+
+    # Digging out the date
+    raw_date = soup.find(itemprop="startDate").getText()
+    raw_time = soup.select_one('.text-center small').getText()
+    raw_time = raw_time.split()
+    date_time = "{} {} {}".format(raw_date, raw_time[1], raw_time[2])
+    date_time = datetime.datetime.strptime(date_time, '%b %d, %Y %I:%M:%S %p')
+
+    if time.localtime().tm_isdst:
+        date_time = date_time - datetime.timedelta(hours=-6)
+        # -6
+    else:
+        date_time = date_time - datetime.timedelta(hours=-7)
+        # -7
+
+    c.execute('''UPDATE races SET date=? WHERE raceID=?''', (date_time, raceID))
+    conn.commit()
+
+
 def add_race_watch(raceID, max_pilots):
     # This will add a race to the watch list.
     config = ConfigParser.RawConfigParser()
@@ -225,6 +248,8 @@ def initial_data_grab(raceID, c, conn):
 
     c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
     conn.commit()
+
+    get_date_time(soup, conn, c, raceID)
 
 
 def get_db_conn():
