@@ -6,6 +6,7 @@ import os
 import datetime
 import message_groupme
 import sqlite3
+import groupme_BOT
 
 
 def send_close_notice(count):
@@ -174,6 +175,29 @@ def start_up():
         create_db()
 
 
+def watch_for_new_race(soup):
+    # Read in all the races.
+
+    table = soup.select('.grid-view table tbody tr')
+    for race in table:
+        race_data = race.select('td')
+        # Parse out all the dates
+        date = str(race_data[0])[4:-5]
+        date = datetime.datetime.strptime(date, '%b %d, %Y')
+        # Dig out RaceID's
+        raceID = str(race_data[1])[12:-9].split('/')[7][6:]
+        race_name = str(race_data[1]).split('>')[2][:-3]
+
+        # Look for races in the future
+        if datetime.datetime.now() < date:
+            # Check DB to see if already watching race.
+            c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
+            i_check = c.fetchone()
+            if not i_check:
+                # If NOT in DB, Add it with a pilot count of 24
+                groupme_BOT.add_race_watch(raceID, 24)
+
+
 def get_soup(url):
     res = session.get(url, verify=False)
     soup = bs4.BeautifulSoup(res.text, "html.parser")
@@ -216,6 +240,7 @@ if __name__ == '__main__':
 
             view_soup = get_soup(view_url)
 
+
             r_name = get_name(view_soup, raceID)
             if r_name != title:
                 update_name(r_name, raceID)
@@ -256,5 +281,11 @@ if __name__ == '__main__':
 
     else:
         print("No Races to check.")
+
+    # Checking to see if we need to add a Race to the watch list.
+    chapter_view_url = "{}{}".format(config.get('multiGP', 'url'), config.get('chapter', 'view_uri'))
+    chapter_view_soup = get_soup(chapter_view_url)
+
+    watch_for_new_race(chapter_view_soup)
 
     conn.close()
