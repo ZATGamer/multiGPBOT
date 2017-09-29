@@ -190,10 +190,13 @@ def watch_for_new_race(soup):
 
         # Look for races in the future
         if datetime.datetime.now() < date:
+            print("Race {} is in the future".format(raceID))
             # Check DB to see if already watching race.
             c.execute('''SELECT * FROM races WHERE raceID=?''', (raceID,))
             i_check = c.fetchone()
             if not i_check:
+                print("Not Watching Race.")
+                print("Adding {} to Watch list.".format(raceID))
                 # If NOT in DB, Add it with a pilot count of 24
                 groupme_BOT.add_race_watch(raceID, 24)
 
