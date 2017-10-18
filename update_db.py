@@ -9,5 +9,6 @@ if __name__ == '__main__':
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    c.execute('''ALTER TABLE races ADD attempt INTEGER''')
+    # c.execute('''UPDATE races SET closed=? WHERE raceID=?''', (0, 10452))
+    c.execute('''ALTER TABLE races ADD closed_notified INTEGER''')
     conn.commit()
