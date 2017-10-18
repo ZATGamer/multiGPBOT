@@ -86,7 +86,7 @@ def update_name(race_name, raceID):
 
 
 def update_status(soup, raceID, closed):
-    if closed is None:
+    if closed is 'None':
         print('updating closed')
         c.execute('''UPDATE races SET closed=? WHERE raceID=?''', (False, raceID))
         conn.commit()
