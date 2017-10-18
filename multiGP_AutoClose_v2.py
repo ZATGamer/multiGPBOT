@@ -10,15 +10,6 @@ import groupme_BOT
 
 
 def send_close_notice(count):
-    # close_url = ''
-    # close_url = 'http://www.multigp.com/mgp/multigp/race/close/id/10051'
-    # print(close_url)
-    # close_race_code = session.post(close_url)
-    # close_race_code = session.get(close_url)
-
-    # update_race_data = session.get('http://www.multigp.com/multigp/race/updateRaceEntries/id/9369')
-
-    # print("Race CLOSED status code: {}".format(close_race_code.status_code))
     print("Race has Reached Limit ({} Pilots). CLOSE IT!".format(count))
     if not notified:
         print("Sending Notice")
@@ -43,8 +34,7 @@ def close_race(notified, attempt, raceID, closeurl):
     print test.status_code
     attempt += 1
     if not notified:
-        body = 'I have tried to close the race.\n' \
-               'If you don\'t see a Race Closed message Next. Click the link'
+        body = 'I am Closing the Race.'
         send_notice(body)
         c.execute('''UPDATE races SET notified=? WHERE raceID=?''', (True, raceID))
 
@@ -165,7 +155,7 @@ def create_db():
                                         max_pilots INTEGER,
                                         notified,
                                         c_count INTEGER,
-                                        title, date, closed, url, attempt)''')
+                                        title, date, closed, url, attempt, closed_notified)''')
     db_conn.commit()
 
 
@@ -243,7 +233,6 @@ if __name__ == '__main__':
 
             view_soup = get_soup(view_url)
 
-
             r_name = get_name(view_soup, raceID)
             if r_name != title:
                 update_name(r_name, raceID)
@@ -252,7 +241,7 @@ if __name__ == '__main__':
                 count = check_race(view_soup, raceID, max_pilots, old_count)
 
                 if count >= max_pilots:
-                    # We should close the race
+                    # We should close the race[
                     attempt = close_race(notified, attempt, raceID, close_url)
                     view_soup = get_soup(view_url)
                     update_status(view_soup, raceID, closed)
