@@ -34,7 +34,7 @@ def close_race(notified, attempt, raceID, closeurl):
     print test.status_code
     attempt += 1
     if not notified:
-        body = 'I am Closing the Race.'
+        body = 'I am Closing the Race {}.'.format(raceID)
         send_notice(body)
         c.execute('''UPDATE races SET notified=? WHERE raceID=?''', (True, raceID))
 
