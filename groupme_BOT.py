@@ -187,7 +187,7 @@ def get_date_time(soup, conn, c, raceID):
     raw_time = soup.select_one('.text-center small').getText()
     raw_time = raw_time.split()
     date_time = "{} {} {}".format(raw_date, raw_time[1], raw_time[2])
-    date_time = datetime.datetime.strptime(date_time, '%b %d, %Y %I:%M:%S %p')
+    date_time = datetime.datetime.strptime(date_time, '%b %d, %Y %I:%M %p')
 
     if time.localtime().tm_isdst:
         date_time = date_time - datetime.timedelta(hours=-6)
@@ -274,7 +274,7 @@ def send_message(body):
 def initial_data_grab(raceID, c, conn):
     res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID))
     soup = bs4.BeautifulSoup(res.text, "html.parser")
-    count = len(soup.select('.list-view .row'))
+    count = len(soup.select('.block-white .row'))
 
     c.execute('''UPDATE races SET "c_count"=? WHERE raceID=?''', (count, raceID))
     conn.commit()

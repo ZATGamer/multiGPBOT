@@ -45,7 +45,7 @@ def close_race(notified, attempt, raceID, closeurl):
 
 def check_race(soup, raceID, max_pilots, old_count):
 
-    count = len(soup.select('.list-view .row'))
+    count = len(soup.select('.block-white .row'))
 
     print('Race {} currently has {} pilots. Out of {}. -- {}'.format(raceID,
                                                                      count,
