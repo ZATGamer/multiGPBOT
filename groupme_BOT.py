@@ -273,7 +273,7 @@ def send_message(body):
 
 def initial_data_grab(raceID, c, conn):
     headers = {'x-requested-with': 'XMLHttpRequest'}
-    res = requests.get('http://www.multigp.com/mgp/races/view/{}/'.format(raceID), verify=False, headers=headers)
+    res = requests.get('https://www.multigp.com/mgp/races/view/{}/'.format(raceID), verify=False, headers=headers)
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     count = len(soup.select('.block-white .row'))
 
