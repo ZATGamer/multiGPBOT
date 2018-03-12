@@ -9,10 +9,10 @@ conn = sqlite3.connect(db_path)
 c = conn.cursor()
 
 # c.execute('''DELETE FROM races WHERE raceID=9558''')
-# c.execute('''DELETE FROM races WHERE raceID=9451''')
+c.execute('''DELETE FROM races WHERE raceID=12722''')
 # conn.commit()
 
-c.execute('''INSERT INTO races (raceID, max_pilots, notified) VALUES(?,?,?)''', (9558, 16, False))
+# c.execute('''INSERT INTO races (raceID, max_pilots, notified) VALUES(?,?,?)''', (9558, 16, False))
 conn.commit()
 
 # c.execute('''INSERT INTO races (raceID, max_pilots, notified) VALUES(?,?,?)''', (9451, 10, False))
