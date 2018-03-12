@@ -192,7 +192,8 @@ def watch_for_new_race(soup):
 
 
 def get_soup(url):
-    res = session.get(url, verify=False)
+    headers = {'x-requested-with': 'XMLHttpRequest'}
+    res = session.get(url, verify=False, headers=headers)
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     return soup
 
